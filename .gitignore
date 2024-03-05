@@ -1,0 +1,10 @@
+.ipynb_checkpoints/
+__pycache__/
+dataset/
+ressources P7/
+mlruns/.trash/
+mlruns/0/
+mlruns/931894627455945656/096dd85e24ba4bcc9970625aaf8247a6/artifacts/model/
+pretrained_embeddings/
+mySaves/advanced_model_large/
+Patin_Clement_4_presentation_012024.pptx

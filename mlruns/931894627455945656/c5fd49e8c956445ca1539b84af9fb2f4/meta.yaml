@@ -1,0 +1,15 @@
+artifact_uri: file:///c:/Users/cleme/OneDrive/Documents/8.%20TRAVAIL%20CLEMENT/2.3.%20Rec%20Data/1.%20OC/2.%20Projets/2.7%20Detectez%20Bad%20Buzz%20Deep%20Learning/mlruns/931894627455945656/c5fd49e8c956445ca1539b84af9fb2f4/artifacts
+end_time: 1709241111929
+entry_point_name: ''
+experiment_id: '931894627455945656'
+lifecycle_stage: active
+run_id: c5fd49e8c956445ca1539b84af9fb2f4
+run_name: simple_optuna_logReg_5
+run_uuid: c5fd49e8c956445ca1539b84af9fb2f4
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1709241110806
+status: 3
+tags: []
+user_id: cleme
