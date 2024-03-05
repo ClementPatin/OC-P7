@@ -3555,14 +3555,14 @@ def load_mlflow_advanced_model(run_name, experiment_name, from_registry = False)
     del query, results, artifact_uri, custom_standardize_args
     gc.collect()
     
-    # return loaded_model
+    return loaded_model
 
 
 
 
 
 
-def predict_with_loaded_model(model, X, proba=True) :
+def predict_with_mlflow_loaded_model(model, X, proba=True) :
     '''
     a function to make prediction with advanced model : first call text_vectorization layer, then the lstm based model
     parameters :
@@ -3585,6 +3585,175 @@ def predict_with_loaded_model(model, X, proba=True) :
 
     # predict scores
     y_prob = model.layers[1].predict(X_temp)[:,0]
+
+    # handle proba and return scores or preds
+    if proba == True :
+        return y_prob
+    else :
+        return np.where(y_prob >= 0.5, 1, 0)
+    
+
+
+
+
+
+def train_advanced_and_TFLite(
+    nSamples, 
+    tweetsPath,     
+    text_vectorizer_params,
+    embedding_params,
+    model_params,
+    early_stopping_patience,
+    fit_params,
+    save_path,
+) :
+
+    # exports
+    from sklearn.model_selection import train_test_split
+    from keras import Sequential
+    from keras.layers import Input
+    from joblib import dump
+    import tensorflow as tf
+    from keras.callbacks import EarlyStopping
+
+    # load more data
+    nSamples = nSamples
+    # use custom function to load the dataset, just with 100000 tweets
+    X_l, y_l = loadTweetsAndFilter(
+        tweetsPath = tweetsPath,
+        nSamples = nSamples,
+        random_state=16
+    )
+
+    # split
+    X_l_train, X_l_test, y_l_train, y_l_test = train_test_split(X_l, y_l, test_size=0.1, random_state=16)
+    X_l_tr_train, X_l_tr_valid, y_l_tr_train, y_l_tr_valid = train_test_split(X_l_train, y_l_train, test_size=0.1, random_state=16)
+
+    ## text_vectorizer
+    text_vectorizer = create_text_vectorizer(**text_vectorizer_params)
+    # adapt
+    text_vectorizer.adapt(X_l_tr_train)
+    # use it
+    X_l_tr_train_vect, X_l_tr_valid_vect, X_l_test_vect = text_vectorizer(X_l_tr_train), text_vectorizer(X_l_tr_valid), text_vectorizer(X_l_test)
+    # save it
+    # first, in order to load the "text_vectorizer" properly with correct serialization of its custom standardize function
+    # save custom_standardize_func args
+    custom_standardize_args = {k : v for k,v in text_vectorizer_params.items() if k in ["lowercase", "url", "email", "hashtag", "mention", "normalization"]}
+    dump(custom_standardize_args, save_path+"/custom_standardize_args.joblib")
+    # 
+    Sequential([Input(shape=(1,), dtype="string"),text_vectorizer], name="text_vectorizer_as_a_model").save(save_path+"/text_vectorizer.keras")
+
+    ## embedding matrix
+    embedding_matrix = get_embedding_matrix(**embedding_params, vocabulary=text_vectorizer.get_vocabulary())
+
+    ## lstm model
+    model = create_LSTM(**model_params, embedding_matrix=embedding_matrix, metrics=["Accuracy", "AUC"])
+    # fit
+    # create earlystopping
+    callbacks = [
+        EarlyStopping(
+            monitor="val_auc",
+            restore_best_weights=True,
+            patience=early_stopping_patience
+        )
+    ]
+    model.fit(
+        x=X_l_tr_train_vect,
+        y=y_l_tr_train,
+        validation_data=(X_l_tr_valid_vect, y_l_tr_valid),
+        callbacks=callbacks,
+        **fit_params
+    )
+    # save with tf_lite
+    converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    # to avoid error
+    converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS, tf.lite.OpsSet.SELECT_TF_OPS]
+    converter._experimental_lower_tensor_list_ops = False
+    # convert
+    tflite_model = converter.convert()
+
+    # save
+    with open(save_path+"/ltsm_model_TFLite.tflite", 'wb') as f:
+        f.write(tflite_model)
+
+
+
+
+
+
+
+def load_prod_advanced_model(load_path) :
+    """
+    given a path, load text_vectorizer and TFLite model
+
+    parameters :
+    ------------
+    load_path - string
+
+    return :
+    --------
+    text_vectorizer, interpreter
+    """
+    # import 
+    from joblib import load
+    import tensorflow as tf
+    import keras
+    
+    # load custom_standardize_args to serialize the custom_standardize function (used by text_vectorization layer)
+    custom_standardize_args = load(load_path+"/custom_standardize_args.joblib")
+    get_custom_standardize_func(**custom_standardize_args)
+
+    # load text_vectorizer
+    text_vectorizer = keras.saving.load_model(load_path+"/text_vectorizer.keras").layers[0]
+
+    # load tflite
+    interpreter = tf.lite.Interpreter(model_path=load_path+"/ltsm_model_TFLite.tflite")
+    
+    return text_vectorizer, interpreter
+
+
+
+
+
+def predict_with_TFLite_loaded_model(text_vectorizer, interpreter, X, proba=True) :
+    '''
+    a function to make prediction with advanced model : first call text_vectorization layer, then the lstm based model
+    parameters :
+    ------------
+    model - sequential : with two layers (text_vectorization, sequential with the lstm model)
+    X - string or list like or tensor : text(s) for classification
+    proba - bool : wether or not to return proba (in [0,1]) or prediction (0 or 1)
+    '''
+    # imports
+    import numpy as np
+    import tensorflow as tf
+
+    # handle X
+    if type(X) == str :
+        X = [X]
+    if type(X) == list :
+        X = np.array(X)
+
+    # use text_vectorization layer
+    X_temp = text_vectorizer(X)
+    # cast to float32 (default tflite dtype)
+    X_temp = tf.cast(X_temp, dtype='float32')
+
+    # get interpreter input and output details
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+
+    # resize interpreter input
+    interpreter.resize_tensor_input(
+        input_index=input_details[0]["index"], 
+        tensor_size=[len(X),text_vectorizer.output_shape[1]]
+        )
+    # allocate
+    interpreter.allocate_tensors()
+    # predict scores
+    interpreter.set_tensor(tensor_index=input_details[0]["index"],value=X_temp)
+    interpreter.invoke()
+    y_prob = interpreter.get_tensor(output_details[0]['index'])[:,0]
 
     # handle proba and return scores or preds
     if proba == True :
