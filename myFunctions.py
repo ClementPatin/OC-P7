@@ -3539,7 +3539,7 @@ def load_mlflow_advanced_model(run_name, experiment_name, from_registry = False)
 
     # filter mlflow.search_run dataframe on this name
     query = f"tags.mlflow.runName = '{run_name}'"
-    results = mlflow.search_runs(experiment_names=["sentiment_analysis"], filter_string=query)
+    results = mlflow.search_runs(experiment_names=[experiment_name], filter_string=query)
     artifact_uri = results["artifact_uri"].values[0]
 
     # load custom_standardize_args to serialize the custom_standardize function (used by text_vectorization layer)
@@ -3569,7 +3569,11 @@ def predict_with_mlflow_loaded_model(model, X, proba=True) :
     ------------
     model - sequential : with two layers (text_vectorization, sequential with the lstm model)
     X - string or list like or tensor : text(s) for classification
-    proba - bool : wether or not to return proba (in [0,1]) or prediction (0 or 1)
+    proba - bool : wether or not to return proba (in [0,1]) or prediction (0 or 1). By default  : True
+
+    return :
+    --------
+    y_prob - array : scores (or predictions if proba=False)
     '''
     # imports
     import numpy as np
@@ -3607,6 +3611,24 @@ def train_advanced_and_TFLite(
     fit_params,
     save_path,
 ) :
+    '''
+    complete training pipeline :
+    - load a given number of data samples
+    - train an advanced model
+    - save text_vectorizer layer
+    - save model as a TFLite file
+
+    parameters :
+    ------------
+    nSamples - int : number of sample to read from the csv file
+    tweetsPath - string : path to csv file
+    text_vectorizer_params - dict : parameters for create_text_vectorizer function
+    embedding_params - dict : parameters for get_embedding_matrix function
+    model_params - dict : parameters for create_LSTM function
+    early_stopping_patience - int : patience for EarlyStopping
+    fit_params - dict : parameters for fit
+    save_path - string : path to save text_vectoriaztion layer, custom_standardize arguments and TFLite model
+    '''
 
     # exports
     from sklearn.model_selection import train_test_split
@@ -3615,6 +3637,7 @@ def train_advanced_and_TFLite(
     from joblib import dump
     import tensorflow as tf
     from keras.callbacks import EarlyStopping
+    import matplotlib.pyplot as plt
 
     # load more data
     nSamples = nSamples
@@ -3671,10 +3694,22 @@ def train_advanced_and_TFLite(
     converter._experimental_lower_tensor_list_ops = False
     # convert
     tflite_model = converter.convert()
-
     # save
     with open(save_path+"/ltsm_model_TFLite.tflite", 'wb') as f:
         f.write(tflite_model)
+
+    # predict on test set
+    scores_test = model.predict(X_l_test_vect)[:,0]
+    fig = plotROCandPRfromTEST(
+        probsList=scores_test, 
+        namesList="advanced model train on "+str(nSamples)+" samples", 
+        ytest=y_l_test, 
+        plot_chance_level=True, 
+        palette=None, 
+        show=True,
+        testSetName = "Test"
+        )
+    fig.savefig(save_path+"/test_roc_pr_curves.png")
 
 
 
@@ -3690,7 +3725,7 @@ def load_prod_advanced_model(load_path) :
     ------------
     load_path - string
 
-    return :
+    returns :
     --------
     text_vectorizer, interpreter
     """
@@ -3717,12 +3752,17 @@ def load_prod_advanced_model(load_path) :
 
 def predict_with_TFLite_loaded_model(text_vectorizer, interpreter, X, proba=True) :
     '''
-    a function to make prediction with advanced model : first call text_vectorization layer, then the lstm based model
+    a function to make prediction with TFLite advanced model
     parameters :
     ------------
-    model - sequential : with two layers (text_vectorization, sequential with the lstm model)
+    text_vectorizer - Text_Vectorization layer 
+    interpreter - TFLite interpreter
     X - string or list like or tensor : text(s) for classification
-    proba - bool : wether or not to return proba (in [0,1]) or prediction (0 or 1)
+    proba - bool : wether or not to return proba (in [0,1]) or prediction (0 or 1). By default : True
+
+    return :
+    --------
+    y_prob - array : scores (or predictions if proba=False)
     '''
     # imports
     import numpy as np
