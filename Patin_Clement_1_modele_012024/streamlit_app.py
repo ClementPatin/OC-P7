@@ -3,7 +3,7 @@ import requests
 
 st.title("Air Paradis - twitter sentiment analysis")
 
-col1, col2, col3 = st. columns(3)
+col1, col2, col3 = st. columns(3, gap="large")
 baseInputs = ["I hate my job", "I love donuts", "my shirt is yellow"]
 
 for i,(col,baseInput) in enumerate(zip([col1, col2, col3], baseInputs)) :
@@ -11,15 +11,25 @@ for i,(col,baseInput) in enumerate(zip([col1, col2, col3], baseInputs)) :
 
         tweet = st.text_input(label="Tweet :", value=baseInput, key=i)
 
-        st.write("Your tweet submission is :", tweet)
+        st.write("")
+        st.write("")
 
 
         API_URL = "http://localhost:8000"
 
-        response = requests.post(API_URL+"/predict", json={"text":tweet})
+        response = requests.post(API_URL+"/predict", json={"text":tweet}).json()
         # response = requests.post(API_URL+"/predict?text="+tweet)
 
-        st.write(response.json())
+        st.write("Score :")
+        st.progress(float(response["score"]), text = response["score"])
+        st.write("")
+        st.write("")
+
+        st.write("Sentiment :")
+        if response["sentiment"] == "positive" :
+            st.header(":smile:")
+        else :
+            st.header("	:angry:")
 
 
 
