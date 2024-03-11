@@ -37,7 +37,7 @@ def predict_sentiment(data : dict) :
 if __name__ == '__main__' :
     uvicorn.run(app, host="127.0.0.1", port = 8000)
 
-# uvicorn Patin_Clement_1_modele_012024:app --reload
+# uvicorn main:app --reload
 
 
 
