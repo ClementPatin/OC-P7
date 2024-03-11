@@ -1,4 +1,4 @@
-version: '1.0'
+version: '3'
 services:
   frontend:
     build: frontend
@@ -29,4 +29,5 @@ networks:
     driver: bridge
 
 
-# docker-compose up --build 
+# docker-compose up --build (pour le créer et le lancer)
+# docker-compose up -d (pour lancer seulement, l'image étant déjà créée)
