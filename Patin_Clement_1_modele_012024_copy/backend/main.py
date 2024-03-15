@@ -11,7 +11,7 @@ app = FastAPI()
 
 @app.get('/')
 def index() :
-    return {"message" : "welcome to the Air Paradis API"}
+    return {"message" : "welcome to the Air Paradis API test GitHub Action"}
 
 
 text_vect_loaded, interpreter_loaded = mf.load_prod_advanced_model(load_path="TfLite")
