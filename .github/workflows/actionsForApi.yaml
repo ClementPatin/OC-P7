@@ -46,7 +46,7 @@ jobs:
         with:
           push: true
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
-          file: ./Dockerfile
+          file: Patin_Clement_1_modele_012024_copy\backend\Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
