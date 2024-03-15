@@ -21,6 +21,12 @@ permissions:
   contents: 'read'
   packages: 'write'
 
+
+defaults:
+  run:
+    working-directory: Patin_Clement_1_modele_012024_copy/backend
+
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -46,7 +52,7 @@ jobs:
         with:
           push: true
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
-          file: ./Patin_Clement_1_modele_012024_copy/backend/Dockerfile
+          file: ./Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
