@@ -2,8 +2,8 @@ version: '3'
 name: oc-p7
 services:
   frontend:
-    build: ./Patin_Clement_1_modele_012024/frontend
-    # image: ocp7containerregistry.azurecr.io/frontend
+    build: frontend
+    # image: ocp7containerregistry.azurecr.io/app:frontend
     image: clementpatin/oc-p7:frontend
     ports:
       - 8501:8501
@@ -17,8 +17,8 @@ services:
     container_name: frontend
     
   backend:
-    build: ./Patin_Clement_1_modele_012024/backend
-    # image: ocp7containerregistry.azurecr.io/backend
+    build: backend
+    # image: ocp7containerregistry.azurecr.io/app:backend
     image: clementpatin/oc-p7:backend
     ports:
       - 8000:8000
@@ -37,12 +37,14 @@ networks:
 # local :
 
 # docker login
-# docker-compose up --build --project-name oc-p7 (pour le créer et le lancer en local)
+# docker-compose up --build -d (pour le créer et le lancer en local)
 # docker-compose up -d (tjs en local, pour le lancer seulement, l'image étant déjà créée)
 
-# docker hub
+# push vers docker hub
+# docker-compose push
 
-# docker-compose push (pour l'enregistrer sur le repose Docker Hub)
+# docker-compose push (pour l'enregistrer sur le repo Docker Hub ou ACR)
+
 
 
 # déploiement Azure Web App :
@@ -56,13 +58,7 @@ networks:
 
 
 # pour le CI/CD :
-
-# relier à docker hub
-# az webapp config container set --name testAppP7 --resource-group oc-p7 --multicontainer-config-file docker-compose.yml --docker-registry-server-user clementpatin --docker-registry-server-password !!!!!MYPASSWORD!!!!!
-
-# avoir WebHook
-# az webapp deployment container config --name testAppP7 --resource-group oc-p7 --enable-cd true --query CI_CD_URL --output tsv
-
+# ..... 
 
 
 # tout effacer :
