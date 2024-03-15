@@ -15,7 +15,7 @@ for i,(col,baseInput) in enumerate(zip([col1, col2, col3], baseInputs)) :
         st.write("")
 
 
-        API_URL = "http://backend:8000"
+        API_URL = "https://testapip7.azurewebsites.net"
 
         response = requests.post(API_URL+"/predict", json={"text":tweet}).json()
         # response = requests.post(API_URL+"/predict?text="+tweet)
@@ -34,3 +34,6 @@ for i,(col,baseInput) in enumerate(zip([col1, col2, col3], baseInputs)) :
 
 
 # streamlit run streamlit_app.py
+            
+
+# 

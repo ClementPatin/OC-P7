@@ -11,5 +11,3 @@ EXPOSE 8501
 ENTRYPOINT ["streamlit","run"]
 
 CMD ["streamlit_app.py"]
-
-# pas besoin, juste utilisé https://testocp7.streamlit.app/
