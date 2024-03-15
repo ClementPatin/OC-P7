@@ -24,7 +24,7 @@ permissions:
 
 defaults:
   run:
-    working-directory: Patin_Clement_1_modele_012024_copy/backend
+    working-directory: ./Patin_Clement_1_modele_012024_copy/backend
 
 
 jobs:
