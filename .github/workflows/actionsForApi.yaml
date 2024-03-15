@@ -27,9 +27,6 @@ permissions:
 
 jobs:
   build:
-    # defaults:
-    #   run:
-    #     working-directory: ./Patin_Clement_1_modele_012024_copy/backend
     runs-on: ubuntu-latest
 
     steps:
@@ -54,12 +51,9 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
           context: ./Patin_Clement_1_modele_012024_copy/backend
-          file: ./Patin_Clement_1_modele_012024_copy/backend/Dockerfile
+          # file: ./Patin_Clement_1_modele_012024_copy/backend/Dockerfile
 
   deploy:
-    # defaults:
-    #   run:
-    #     working-directory: ./Patin_Clement_1_modele_012024_copy/backend
     runs-on: ubuntu-latest
 
     needs: build
