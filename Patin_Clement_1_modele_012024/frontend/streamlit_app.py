@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-st.title("Air Paradis - twitter sentiment analysis")
+st.title("Air Paradis - twitter sentiment analysis_test2")
 
 col1, col2, col3 = st. columns(3, gap="large")
 baseInputs = ["I hate my job", "I love donuts", "my shirt is yellow"]

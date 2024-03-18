@@ -7,10 +7,11 @@
 # To get a newer version, you will need to update the SHA.
 # You can also reference a tag or branch, but the action may change without warning.
 
-name: Build and deploy a container to an Azure Web App
+name: Build and deploy api and ui containers to Azure Web Apps
 
 env:
-  AZURE_WEBAPP_NAME_API: testApiP7   # set this to your application's name
+  AZURE_WEBAPP_NAME_API: testApiP7  
+  AZURE_WEBAPP_NAME_UI: testUiP7
 
 on:
   push:
@@ -49,8 +50,16 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
+          tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}-api
           context: ./Patin_Clement_1_modele_012024/backend
+          # file: ./Patin_Clement_1_modele_012024/backend/Dockerfile
+
+      - name: Build and push container image FRONTEND to registry
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}-ui
+          context: ./Patin_Clement_1_modele_012024/frontend
           # file: ./Patin_Clement_1_modele_012024/backend/Dockerfile
 
   deploy:
@@ -62,11 +71,18 @@ jobs:
       - name: Lowercase the repo name
         run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
 
-      - name: Deploy to Azure Web App
+      - name: Deploy API to Azure Web App
         id: deploy-to-webapp
-        # uses: azure/webapps-deploy@85270a1854658d167ab239bce43949edb336fa7c
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME_API }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          images: 'ghcr.io/${{ env.REPO }}:${{ github.sha }}'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_API }}
+          images: 'ghcr.io/${{ env.REPO }}:${{ github.sha }}-api'
+
+      - name: Deploy UI to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME_UI }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_UI }}
+          images: 'ghcr.io/${{ env.REPO }}:${{ github.sha }}-ui'
