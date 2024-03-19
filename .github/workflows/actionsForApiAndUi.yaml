@@ -52,7 +52,6 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}-api
           context: ./Patin_Clement_1_modele_012024/backend
-          # file: ./Patin_Clement_1_modele_012024/backend/Dockerfile
 
       - name: Build and push container image FRONTEND to registry
         uses: docker/build-push-action@v5
@@ -60,7 +59,6 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}-ui
           context: ./Patin_Clement_1_modele_012024/frontend
-          # file: ./Patin_Clement_1_modele_012024/backend/Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
