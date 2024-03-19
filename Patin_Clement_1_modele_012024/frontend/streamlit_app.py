@@ -1,10 +1,10 @@
 import streamlit as st
 import requests
 
-st.title("Air Paradis - twitter sentiment analysis")
+st.title("Air Paradis - twitter sentiment analysis_test CI/CD")
 
 col1, col2, col3 = st. columns(3, gap="large")
-baseInputs = ["I hate my job", "I love donuts", ""]
+baseInputs = ["I hate my job", "I love donuts", "my shirt is yellow"]
 
 for i,(col,baseInput) in enumerate(zip([col1, col2, col3], baseInputs)) :
     with col :
@@ -15,8 +15,8 @@ for i,(col,baseInput) in enumerate(zip([col1, col2, col3], baseInputs)) :
         st.write("")
 
 
-        API_URL = "http://backend:8000"
-
+        API_URL = "https://testapip7.azurewebsites.net"
+        
         response = requests.post(API_URL+"/predict", json={"text":tweet}).json()
         # response = requests.post(API_URL+"/predict?text="+tweet)
 
@@ -39,3 +39,6 @@ for i,(col,baseInput) in enumerate(zip([col1, col2, col3], baseInputs)) :
 
 
 # streamlit run streamlit_app.py
+            
+
+# 
