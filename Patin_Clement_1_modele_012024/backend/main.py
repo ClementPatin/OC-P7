@@ -12,7 +12,7 @@ app = FastAPI()
 # create index
 @app.get('/')
 def index() :
-    return {"message" : "welcome to the Air Paradis API _test CI/CD"}
+    return {"message" : "welcome to the Air Paradis API"}
 
 # load text_vectorization layer and model interpreter form TfLite folder
 text_vect_loaded, interpreter_loaded = mf.load_prod_advanced_model(load_path="TfLite")
