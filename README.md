@@ -37,7 +37,7 @@ In order to **respond as best as possible to *Air Paradis*** and allow **better 
 
 ## organization of the github repository
 
-'''bash
+```bash
 
 │   .gitignore
 │   Patin_Clement_2_scripts_012024.ipynb
@@ -132,7 +132,7 @@ In order to **respond as best as possible to *Air Paradis*** and allow **better 
 │           Dockerfile
 │           requirements.txt
 │           streamlit_app.py
-'''
+```
 
 ## other needed files and folders in local
 
