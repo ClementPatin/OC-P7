@@ -138,7 +138,7 @@ In order to **respond as best as possible to *Air Paradis*** and allow **better 
 
 `Patin_Clement_2_scripts_012024.ipynb` needs other files and folder to run :
 
-'''bash
+```bash
 
 ├───dataset
 │       training.1600000.processed.noemoticon.csv
@@ -147,4 +147,4 @@ In order to **respond as best as possible to *Air Paradis*** and allow **better 
 │       glove.6B.300d.txt
 │       glove.twitter.27B.50d.txt
 │
-'''
+```
