@@ -136,7 +136,7 @@ In order to **respond as best as possible to *Air Paradis*** and allow **better 
 
 ## other needed files and folders in local
 
-`Patin_Clement_2_scripts_012024.ipynb` needs other files and folder to run :
+`Patin_Clement_2_scripts_012024.ipynb` needs other files and folders to run :
 
 ```bash
 
